@@ -62,6 +62,7 @@ def solve_queen(size):
             number_of_iterations+=1
             if next_row_is_safe(column):
                 place_in_next_row(column)
+                number_of_moves += 1
                 row += 1
                 column = 0
                 break
