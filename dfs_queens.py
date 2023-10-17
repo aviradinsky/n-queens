@@ -26,7 +26,7 @@ def place_n_queens(size):
         columns.append(column)
         row+=1
 
-place_n_queens(size)
+# place_n_queens(size)
 
 """Now, we can print the result with a simple loop:"""
 
@@ -39,9 +39,17 @@ def display():
                 print(' .', end=' ')
         print()
 
-place_n_queens(size)
-display()
-print(columns)
+def edisplay():
+    for row in range(len(columns)):
+        for column in range(size):
+            if column == columns[row]:
+                print('♛', end=' ', file=stderr)
+            else:
+                print('.', end=' ', file=stderr)
+        print(file=stderr)
+# place_n_queens(size)
+# display()
+# print(columns)
 
 """This of course is not necessary legal, so we'll write a simple DFS search with backtracking:"""
 
@@ -128,15 +136,53 @@ def next_row_is_safe(column):
             return False
     return True
 
-#size = int(input('Enter n: '))
-num_iterations=0
-number_moves = 0
-#for i in range(0, 100):
-#    columns = [] #columns is the locations for each of the queens
-num_iterations, number_moves=solve_queen(size)
-print(num_iterations)
-print(number_moves)
-print(columns)
+def correct() -> bool:
+    # take in [1,3,5] as the board
+    if len(set(columns)) != size:
+        return False
+
+    for (i0, a) in enumerate(columns):
+        for (i1, b) in enumerate(columns):
+            if i0 == i1: continue
+            if abs(i0 - i1) == abs(a - b) or a == b:
+                return False
+    return True
+
+def british_museum(size: int) -> tuple[int, int]:
+    place_n_queens(size)
+    count = 1
+    while not correct():
+        place_n_queens(size)
+        count += 1
+    return count, count * 8
+
+
+from time import time
+from sys import stderr
+
+
+for method, m in (
+    (solve_queen,18),
+    (british_museum,9),
+):
+    print(method.__name__ , file=stderr)
+    print("n,number_of_iterations,number_of_moves,time", file=stderr)
+    for i in range(4,m):
+        #size = int(input('Enter n: '))
+        size = i
+        num_iterations=0
+        number_moves = 0
+        #for i in range(0, 100):
+        #    columns = [] #columns is the locations for each of the queens
+        start = time()
+        num_iterations, number_moves=method(size)
+        end = time()
+        # edisplay()
+        # print(num_iterations)
+        # print(number_moves)
+        # print(columns)
+        print(size, num_iterations, number_moves, end - start, file=stderr, sep=',')
+    print(file=stderr)
 
 """Now what?  Can you implement the British Museum Algorithm?  How many moves and iterations did it take to solve the 4 queens problem?  
 
