@@ -13,9 +13,9 @@ As we did in class, we will represent the board as a one-dimensional array where
 
 columns = [] #columns is the locations for each of the queens
 # columns[r] is a number c if a queen is placed at row r and column c.
-size = 8
+size = 30
 import random #hint -- you will need this for the following code: column=random.randrange(0,size)
-
+from sys import stderr
 """Let's setup one iteration of the British Museum algorithm-- we'll put down 4 queens randomly."""
 
 def place_n_queens(size):
@@ -156,14 +156,55 @@ def british_museum(size: int) -> tuple[int, int]:
         count += 1
     return count, count * 8
 
+def hrss(size: int) -> tuple[int, int]:
+    number_of_moves = 0 #where do I change this so it counts the number of Queen moves?
+    number_of_iterations = 0
+    place_n_queens(size); number_of_moves += 8
+    while True:
+        number_of_iterations += 1
+        scores = hscore()
+        total_score = sum(scores)
+        if total_score == 0:
+            # you found something
+            return number_of_iterations, number_of_moves
+        # find the worst spot and kill it
+        worst_score, worst_score_index = max((v,i) for (i,v) in enumerate(scores))
+        worst_score_value = columns[worst_score_index]
+        for a in range(size):
+            if a == worst_score_value: continue
+            c = index_value_score(worst_score_index, a)
+            if c < worst_score:
+                columns[worst_score_index] = a; number_of_moves += 1
+                break
+        else:
+            if columns[0] & 1:
+                random.shuffle(columns)
+            else:
+                place_n_queens(size)
+            number_of_moves += 8
+
+def index_value_score(i0: int, a: int) -> int:
+    count = 0
+    for (i1, b) in enumerate(columns):
+        if i0 == i1: # its the same number
+            continue
+        if a == b:
+            count += 1
+        elif abs(i0 - i1) == abs(a - b):
+            count += 1
+    return count
+
+
+def hscore() -> list[int]:
+    return [index_value_score(i0,a) for (i0, a) in enumerate(columns)]
+
 
 from time import time
-from sys import stderr
-
 
 for method, m in (
     (solve_queen,18),
     (british_museum,9),
+    (hrss,41),
 ):
     print(method.__name__ , file=stderr)
     print("n,number_of_iterations,number_of_moves,time", file=stderr)
@@ -181,7 +222,7 @@ for method, m in (
         # print(num_iterations)
         # print(number_moves)
         # print(columns)
-        print(size, num_iterations, number_moves, end - start, file=stderr, sep=',')
+        print(size, num_iterations, number_moves, end - start, sep=',', file=stderr)
     print(file=stderr)
 
 """Now what?  Can you implement the British Museum Algorithm?  How many moves and iterations did it take to solve the 4 queens problem?  
