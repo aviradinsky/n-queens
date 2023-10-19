@@ -54,7 +54,7 @@ def edisplay():
 
 """This of course is not necessary legal, so we'll write a simple DFS search with backtracking:"""
 
-def solve_queen(size):
+def dfs(size):
     columns.clear()
     number_of_moves = 0 #where do I change this so it counts the number of Queen moves?
     number_of_iterations = 0
@@ -157,7 +157,7 @@ def british_museum(size: int) -> tuple[int, int]:
         count += 1
     return count, count * 8
 
-def hrss(size: int) -> tuple[int, int]:
+def heuristic_stochastic(size: int) -> tuple[int, int]:
     number_of_moves = 0 #where do I change this so it counts the number of Queen moves?
     number_of_iterations = 0
     place_n_queens(size); number_of_moves += 8
@@ -203,14 +203,17 @@ def forward_checking(size: int) -> tuple[int, int]:
     # enums
     AVAILABLE, UNAVAILABLE, QUEEN = 0, 1, 2
     iterations, moves = 0, 0
-    stack = [[[AVAILABLE for _ in range(size)] for _ in range(size)]]
+    stack = [[[AVAILABLE] * size for _ in range(size)]]
     row = 0
     while row < size:
         iterations += 1
-        if AVAILABLE in stack[-1][row]:
+        # Is there an available spot for the queen?
+        if choices := [i for (i, v) in enumerate(stack[-1][row]) if v == AVAILABLE]: 
+            # YES!
+
             board = copy.deepcopy(stack[-1])
             # choose a random AVAILABLE spot for the queen
-            col = random.choice([i for (i, v) in enumerate(board[row]) if v == AVAILABLE])
+            col = random.choice(choices) # introduce a little anarchy
             board[row][col] = QUEEN
             moves += 1
 
@@ -225,6 +228,8 @@ def forward_checking(size: int) -> tuple[int, int]:
             stack.append(board)
             row += 1
         else:
+            # NO!
+            # we mark the queens location in the prior row as unavailable
             row -= 1    
             queen_index = stack.pop()[row].index(QUEEN)
             stack[-1][row][queen_index] = UNAVAILABLE
@@ -238,27 +243,123 @@ def forward_checking(size: int) -> tuple[int, int]:
 
 def eprint(*args, **kwargs):
     print(*args, **kwargs, file=stderr)
+
 from time import time
 
 for method, m in (
-    (solve_queen,18),
-    (british_museum,9),
-    (hrss,20),
+    (dfs,18),
+    (british_museum,11),
+    (heuristic_stochastic,21),
     (forward_checking, 41),
 ):
-    print(method.__name__ , file=stderr)
-    print("n,number_of_iterations,number_of_moves,time", file=stderr)
+    eprint(method.__name__)
+    eprint("n,number_of_iterations,number_of_moves,time")
     for i in range(4,m):
         size = i
 
         start = time()
         num_iterations, number_moves=method(size)
         end = time()
+        assert correct()
 
-        print(size, num_iterations, number_moves, end - start, sep=',', file=stderr)
-    print(file=stderr)
+        eprint(size, num_iterations, number_moves, end - start, sep=',')
+    eprint()
 
 """Now what?  Can you implement the British Museum Algorithm?  How many moves and iterations did it take to solve the 4 queens problem?  
 
 How many moves/iterations did it take to solve the 8 queens (if at all)?
+"""
+"""
+It is clear that foward checking is optimal relative to all other solutions in this file.
+foward_checking(40) was less than dfs(17), british_museum(10), and heuristic_stochastic(20)
+"""
+"""
+STDERR Output:
+dfs
+n,number_of_iterations,number_of_moves,time
+4,31,8,4.291534423828125e-05
+5,16,5,2.4080276489257812e-05
+6,197,31,0.00010514259338378906
+7,45,9,3.6716461181640625e-05
+8,982,113,0.0004229545593261719
+9,366,41,0.0001819133758544922
+10,1068,102,0.0004780292510986328
+11,559,52,0.00032591819763183594
+12,3316,261,0.001489877700805664
+13,1464,111,0.0006861686706542969
+14,28381,1899,0.013126850128173828
+15,21625,1359,0.010127782821655273
+16,170749,10052,0.08274674415588379
+17,96580,5374,0.04740405082702637
+
+british_museum
+n,number_of_iterations,number_of_moves,time
+4,49,392,0.00011491775512695312
+5,95,760,0.0002028942108154297
+6,33184,265472,0.08078217506408691
+7,24761,198088,0.06702280044555664
+8,106874,854992,0.3733558654785156
+9,591612,4732896,2.265469789505005
+10,16785851,134286808,69.41682505607605
+
+heuristic_stochastic
+n,number_of_iterations,number_of_moves,time
+4,12,40,0.0001442432403564453
+5,4,11,2.3603439331054688e-05
+6,124,369,0.0010120868682861328
+7,43,113,0.0003960132598876953
+8,64,155,0.0007219314575195312
+9,35,84,0.000476837158203125
+10,223,482,0.0036301612854003906
+11,70,140,0.0013229846954345703
+12,396,809,0.008708000183105469
+13,783,1553,0.01955103874206543
+14,1254,2374,0.03569316864013672
+15,75,152,0.0023910999298095703
+16,2994,5332,0.10678577423095703
+17,25245,43732,1.0176739692687988
+18,27679,47139,1.2448198795318604
+19,14806,24459,0.7162482738494873
+20,96782,157101,5.183632850646973
+
+forward_checking
+n,number_of_iterations,number_of_moves,time
+4,12,8,0.00017189979553222656
+5,5,5,7.510185241699219e-05
+6,16,11,0.00017976760864257812
+7,15,11,0.00021505355834960938
+8,18,13,0.00041294097900390625
+9,41,25,0.0008428096771240234
+10,256,133,0.006241798400878906
+11,51,31,0.0012497901916503906
+12,88,50,0.002395153045654297
+13,645,329,0.018123149871826172
+14,174,94,0.005527019500732422
+15,957,486,0.032958984375
+16,230,123,0.008910894393920898
+17,41,29,0.0023658275604248047
+18,24,21,0.0018999576568603516
+19,911,465,0.04635787010192871
+20,758,389,0.04224681854248047
+21,241,131,0.015611886978149414
+22,42,32,0.0041239261627197266
+23,1835,929,0.12987804412841797
+24,1092,558,0.08339715003967285
+25,25,25,0.004157066345214844
+26,80,53,0.009439945220947266
+27,93,60,0.012593269348144531
+28,34,31,0.006312847137451172
+29,1051,540,0.1149129867553711
+30,74,52,0.01186513900756836
+31,3809,1920,0.46265602111816406
+32,34,33,0.008544206619262695
+33,71,52,0.014286041259765625
+34,146,90,0.026019811630249023
+35,2575,1305,0.41001319885253906
+36,122,79,0.025623798370361328
+37,69,53,0.018095970153808594
+38,48,43,0.015633821487426758
+39,4493,2266,0.8460237979888916
+40,64,52,0.020587921142578125
+
 """
