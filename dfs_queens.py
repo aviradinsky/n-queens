@@ -16,6 +16,7 @@ columns = [] #columns is the locations for each of the queens
 size = 30
 import random #hint -- you will need this for the following code: column=random.randrange(0,size)
 from sys import stderr
+import copy
 """Let's setup one iteration of the British Museum algorithm-- we'll put down 4 queens randomly."""
 
 def place_n_queens(size):
@@ -198,30 +199,62 @@ def index_value_score(i0: int, a: int) -> int:
 def hscore() -> list[int]:
     return [index_value_score(i0,a) for (i0, a) in enumerate(columns)]
 
+def forward_checking(size: int) -> tuple[int, int]:
+    # enums
+    AVAILABLE, UNAVAILABLE, QUEEN = 0, 1, 2
+    iterations, moves = 0, 0
+    stack = [[[AVAILABLE for _ in range(size)] for _ in range(size)]]
+    row = 0
+    while row < size:
+        iterations += 1
+        if AVAILABLE in stack[-1][row]:
+            board = copy.deepcopy(stack[-1])
+            # choose a random AVAILABLE spot for the queen
+            col = random.choice([i for (i, v) in enumerate(board[row]) if v == AVAILABLE])
+            board[row][col] = QUEEN
+            moves += 1
 
+            # black out the lower rows
+            for (i, later_rows) in enumerate(range(row + 1, size), start=1):
+                # block out lower vertical
+                board[later_rows][col] = UNAVAILABLE
+                # block out lower diagonals
+                if col - i >= 0: board[later_rows][col - i] = UNAVAILABLE
+                if col + i < size: board[later_rows][col + i] = UNAVAILABLE
+            
+            stack.append(board)
+            row += 1
+        else:
+            row -= 1    
+            queen_index = stack.pop()[row].index(QUEEN)
+            stack[-1][row][queen_index] = UNAVAILABLE
+
+    # convert the final board into the file standard format representation
+    columns.clear()
+    for row in stack.pop():
+        columns.append(row.index(QUEEN))
+
+    return iterations, moves
+
+def eprint(*args, **kwargs):
+    print(*args, **kwargs, file=stderr)
 from time import time
 
 for method, m in (
     (solve_queen,18),
     (british_museum,9),
-    (hrss,41),
+    (hrss,20),
+    (forward_checking, 41),
 ):
     print(method.__name__ , file=stderr)
     print("n,number_of_iterations,number_of_moves,time", file=stderr)
     for i in range(4,m):
-        #size = int(input('Enter n: '))
         size = i
-        num_iterations=0
-        number_moves = 0
-        #for i in range(0, 100):
-        #    columns = [] #columns is the locations for each of the queens
+
         start = time()
         num_iterations, number_moves=method(size)
         end = time()
-        # edisplay()
-        # print(num_iterations)
-        # print(number_moves)
-        # print(columns)
+
         print(size, num_iterations, number_moves, end - start, sep=',', file=stderr)
     print(file=stderr)
 

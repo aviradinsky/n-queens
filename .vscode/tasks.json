@@ -14,6 +14,12 @@
             "type": "shell",
             "command": "python3.12 dfs_queens.py",
             "problemMatcher": []
+        },
+        {
+            "label": "ogrun",
+            "type": "shell",
+            "command": "python3.12 og.py",
+            "problemMatcher": []
         }
     ]
 }
