@@ -258,7 +258,7 @@ def eprint(*args, **kwargs):
 from time import time
 
 # iters = 100
-# size = 20
+# size = 25
 # print("method.__name__, avg_time, avg_moves, avg_iterations")
 # for method in (heuristic_stochastic, forward_checking):
 #     total_time = 0
@@ -407,11 +407,11 @@ n,number_of_iterations,number_of_moves,time
 
 foward checking vs. hill climbing
 
-100 trials, size 20
+100 trials, size 25
 
 method.__name__, avg_time, avg_moves, avg_iterations
-heuristic_stochastic,0.9463164019584656,29003.34,17848.0
-forward_checking,0.04434385538101196,404.21,788.42
+heuristic_stochastic,9.453199474811553,177896.59,119105.97
+forward_checking,0.09797350883483887,597.98,1170.96
 
 as we can clearly see, foward checking demolishes hill climbing
 """
