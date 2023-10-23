@@ -257,6 +257,23 @@ def eprint(*args, **kwargs):
 
 from time import time
 
+# iters = 100
+# size = 20
+# print("method.__name__, avg_time, avg_moves, avg_iterations")
+# for method in (heuristic_stochastic, forward_checking):
+#     total_time = 0
+#     total_moves = 0
+#     total_iterations = 0
+#     for i in range(iters):
+#         start = time()
+#         num_iterations, number_moves = method(size)
+#         end = time()
+#         total_time += (end - start)
+#         total_moves += number_moves
+#         total_iterations += num_iterations
+#     print(method.__name__, total_time/iters, total_moves/iters, total_iterations/iters, sep=",")
+# exit()
+
 for method, m in (
     (dfs,26),
     (british_museum,11),
@@ -385,4 +402,16 @@ n,number_of_iterations,number_of_moves,time
 38,492,265,0.09482288360595703
 39,4241,2140,0.8106319904327393
 40,520,280,0.1115870475769043
+
+
+
+foward checking vs. hill climbing
+
+100 trials, size 20
+
+method.__name__, avg_time, avg_moves, avg_iterations
+heuristic_stochastic,0.9463164019584656,29003.34,17848.0
+forward_checking,0.04434385538101196,404.21,788.42
+
+as we can clearly see, foward checking demolishes hill climbing
 """
